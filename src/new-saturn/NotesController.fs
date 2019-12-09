@@ -2,6 +2,11 @@ module NotesController
 
 open Saturn
 
+open FSharp.Control.Tasks.ContextInsensitive
+open System.Net.Http
+open Microsoft.AspNetCore.Http
+open Giraffe.ResponseWriters
+
 type Attachment = {
     name: string
     id: string
@@ -28,6 +33,12 @@ let notes : Note list = [
         }]
     }
 ]
+
+let writeOtherUrlBack (url: string) (ctx: HttpContext) = task {
+    let httpClient = new HttpClient()
+    let! respString = httpClient.GetStringAsync(url)
+    return! ctx.WriteTextAsync respString
+} 
 
 let writeOutIfSome ctx value = 
     match value with
